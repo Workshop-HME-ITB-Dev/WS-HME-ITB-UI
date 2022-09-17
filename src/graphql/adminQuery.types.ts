@@ -1,6 +1,6 @@
 export interface LoginAdminInput {
-    email: string;
-    password: string;
+  email: string;
+  password: string;
 }
 
 export interface LoginAdminResponse {
@@ -17,11 +17,9 @@ export interface LoginAdminResponse {
 
 // Admin Register
 export interface CreateAdminInput {
-  createAdminInput: {
-    email: string;
-    name: string;
-    password: string;
-  };
+  email: string;
+  name: string;
+  password: string;
 }
 
 export interface CreateAdminResponse {

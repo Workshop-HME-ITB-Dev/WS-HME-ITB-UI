@@ -6,6 +6,7 @@ import { validateRegisterForm } from "../../utils/authFormValidator";
 import { CreateAdminInput, CreateAdminResponse } from "../../graphql/adminQuery.types";
 import { useMutation } from "@apollo/client";
 import { REGISTER_ADMIN } from "../../graphql/adminQuery";
+import axios from "axios";
 
 const Register = (): JSX.Element => {
   const [registerAdmin] = useMutation<CreateAdminResponse>(REGISTER_ADMIN);
@@ -39,16 +40,12 @@ const Register = (): JSX.Element => {
       setLoading(true);
       // change with mutation gql
       const variables: CreateAdminInput = {
-        createAdminInput: {
           email: formData.email,
           name: formData.name,
           password: formData.password
-        }
       }
       try {
-        const registerData = await registerAdmin({
-          variables: variables
-        });
+        const registerData = await axios.post(process.env.REACT_APP_API_HOST_URL + '/admins', variables);
         // if success
         if (registerData.data) {
           // Add wait for redirecting to login
