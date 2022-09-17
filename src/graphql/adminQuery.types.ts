@@ -1,8 +1,6 @@
 export interface LoginAdminInput {
-  createLoginInput: {
     email: string;
     password: string;
-  };
 }
 
 export interface LoginAdminResponse {

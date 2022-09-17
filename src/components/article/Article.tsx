@@ -17,7 +17,6 @@ const Article = (): JSX.Element => {
 
   const fetchArticles = async () => {
     setLoading(true);
-    console.log(process.env.REACT_APP_API_HOST_URL + '/articles');
     try {
       const { data }: { data: GetArticlesResponseRest } = await axios.get(process.env.REACT_APP_API_HOST_URL + '/articles');
       setData({
@@ -28,7 +27,6 @@ const Article = (): JSX.Element => {
       setError(e.message);
       setShowAlert(true);
     }
-    console.log(data);
   }
 
   useEffect(() => {

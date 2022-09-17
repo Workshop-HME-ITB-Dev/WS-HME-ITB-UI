@@ -38,3 +38,9 @@ export interface UpdateShopResponse {
 export interface RemoveShopResponse {
   removeShop: Product;
 }
+
+export interface GetShopsResponseRest {
+  status: String;
+  data: Product[];
+  message: String;
+}

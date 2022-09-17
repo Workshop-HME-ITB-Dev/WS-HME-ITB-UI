@@ -6,7 +6,7 @@ export const jwtValidate = (token: string) => {
   return {
     isAuth: decoded && !isExpired,
     adminData: {
-      id: decoded.sub,
+      id: decoded.id,
       email: decoded.email,
       name: decoded.name,
     },
@@ -22,7 +22,7 @@ export const checkToken = () => {
 };
 
 export interface JWTCustomPayload {
-  sub: number;
+  id: number;
   iat: number;
   exp: number;
   email: string;

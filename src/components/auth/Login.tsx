@@ -1,4 +1,5 @@
 import { useMutation } from "@apollo/client";
+import axios, { Axios } from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { LOGIN_ADMIN } from "../../graphql/adminQuery";
@@ -47,18 +48,16 @@ const Login = (): JSX.Element => {
       setLoading(true);
       // change with mutation gql
       const variables: LoginAdminInput = {
-        createLoginInput: {
-          email: formData.email,
-          password: formData.password
-        }
+        email: formData.email,
+        password: formData.password
       }
       try {
-        const loginData = await loginAdmin({ variables })
+        const { data: loginData } = await axios.post(process.env.REACT_APP_API_HOST_URL + '/login', variables);
         // if success
         if (loginData.data) {
           await new Promise(r => setTimeout(r, 1500));
           // Set token
-          localStorage.setItem('token', loginData.data.login.accessToken)
+          localStorage.setItem('token', loginData.data.token)
           // Add wait for redirecting to login
           navigate('/admin/pickup');
           window.location.reload();
