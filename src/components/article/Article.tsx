@@ -1,7 +1,5 @@
-import { useQuery } from "@apollo/client";
 import axios from "axios";
 import { useState, useEffect } from "react";
-import { GET_ARTICLES } from "../../graphql/articleQuery";
 import { GetArticlesResponse, GetArticlesResponseRest } from "../../graphql/articleQuery.types";
 import AlertCard from "../dashboard/basiccomponent/AlertCard";
 import Footer from "../Footer";
@@ -10,7 +8,6 @@ import Spinner from "../Spinner";
 import ArticleCard from "./ArticleCard";
 
 const Article = (): JSX.Element => {
-  // const { loading, error, data } = useQuery<GetArticlesResponse>(GET_ARTICLES);
   const [data, setData] = useState<GetArticlesResponse>({
     articles: []
   });
