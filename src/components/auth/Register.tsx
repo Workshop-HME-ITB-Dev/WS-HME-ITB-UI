@@ -3,13 +3,10 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import { ErrorRegisterForm, RegisterForm } from "./auth.types";
 import { validateRegisterForm } from "../../utils/authFormValidator";
-import { CreateAdminInput, CreateAdminResponse } from "../../graphql/adminQuery.types";
-import { useMutation } from "@apollo/client";
-import { REGISTER_ADMIN } from "../../graphql/adminQuery";
+import { CreateAdminInput } from "../../graphql/adminQuery.types";
 import axios from "axios";
 
 const Register = (): JSX.Element => {
-  const [registerAdmin] = useMutation<CreateAdminResponse>(REGISTER_ADMIN);
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState<RegisterForm>({
