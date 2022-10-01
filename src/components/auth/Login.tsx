@@ -1,16 +1,13 @@
-import { useMutation } from "@apollo/client";
-import axios, { Axios } from "axios";
+import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { LOGIN_ADMIN } from "../../graphql/adminQuery";
-import { LoginAdminInput, LoginAdminResponse } from "../../graphql/adminQuery.types";
+import { LoginAdminInput } from "../../graphql/adminQuery.types";
 import { validateLoginForm } from "../../utils/authFormValidator";
 import { jwtValidate } from "../../utils/jwtvalidator";
 import TopCover from "../dashboard/basiccomponent/TopCover";
 import { ErrorLoginForm, LoginForm } from "./auth.types";
 
 const Login = (): JSX.Element => {
-  const [loginAdmin] = useMutation<LoginAdminResponse>(LOGIN_ADMIN);
   const navigate = useNavigate();
   const checkToken = async () => {
     const token = localStorage.getItem('token');
