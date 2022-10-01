@@ -1,14 +1,12 @@
 import { ArticleRaw } from "../components/article/article.types";
 
 export interface CreateArticleInput {
-  createArticleInput: {
-    title: string;
-    desc: string;
-    imageUrl: string;
-    publishedDate: string;
-    duration: number;
-    link: string;
-  };
+  title: string;
+  desc: string;
+  imageUrl: string;
+  publishedDate: string;
+  duration: number;
+  link: string;
 }
 
 export interface UpdateArticleInput {

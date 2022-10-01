@@ -1,14 +1,13 @@
-import { useMutation } from "@apollo/client";
+import axios from "axios";
 import moment from "moment";
 import { useState } from "react";
-import { CREATE_ARTICLE } from "../../../../graphql/articleQuery";
-import { AddArticlesResponse, CreateArticleInput } from "../../../../graphql/articleQuery.types";
+import { CreateArticleInput } from "../../../../graphql/articleQuery.types";
 import { validateArticleForm } from "../../../../utils/articleFormValidator";
+import { configCreator } from "../../../../utils/configCreator";
 import { checkToken } from "../../../../utils/jwtvalidator";
 import { Article, ArticleError } from "../../../article/article.types";
 
 const ArticleAddModal = ({ formData, setFormData, setShowModal, setActionResult, refreshData }: ArticleAddModalProps): JSX.Element => {
-    const [createArticle] = useMutation<AddArticlesResponse>(CREATE_ARTICLE);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<ArticleError>({
         title: "",
@@ -24,21 +23,23 @@ const ArticleAddModal = ({ formData, setFormData, setShowModal, setActionResult,
         setError(res);
         if (!err) {
             setLoading(true);
-            // Mutation gql
             try {
                 const variables: CreateArticleInput = {
-                    createArticleInput: {
-                        title: formData.title,
-                        desc: formData.desc,
-                        imageUrl: formData.imageUrl,
-                        publishedDate: formData.publishedDate.toISOString(),
-                        duration: Number(formData.duration),
-                        link: formData.link,
-                    }
+                    title: formData.title,
+                    desc: formData.desc,
+                    imageUrl: formData.imageUrl,
+                    publishedDate: formData.publishedDate.toISOString(),
+                    duration: Number(formData.duration),
+                    link: formData.link,
                 }
-                const article = await createArticle({ variables })
+                const article = await axios.post(
+                    process.env.REACT_APP_API_HOST_URL + '/articles',
+                    variables,
+                    configCreator()
+                );
+                console.log(article);
 
-                if (article.data) {
+                if (article.data.data) {
                     // set Action Result
                     setActionResult({
                         title: "Success!",

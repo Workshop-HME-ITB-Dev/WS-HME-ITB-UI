@@ -13,6 +13,7 @@ import { GET_ARTICLES } from "../../../graphql/articleQuery";
 import { GetArticlesResponse } from "../../../graphql/articleQuery.types";
 import { useLazyQuery } from "@apollo/client";
 import { checkToken } from "../../../utils/jwtvalidator";
+import axios from "axios";
 
 const ArticleDashboard = (): JSX.Element => {
   const [getArticles, { loading, error }] = useLazyQuery<GetArticlesResponse>(GET_ARTICLES, { fetchPolicy: 'cache-and-network' });
@@ -49,9 +50,11 @@ const ArticleDashboard = (): JSX.Element => {
 
   const refreshData = async (): Promise<any> => {
     try {
-      const fetchArticleData = await getArticles();
-      if (fetchArticleData.data) {
-        const dataFormatted = fetchArticleData.data.articles.map(x => ({ ...x, publishedDate: new Date(x.publishedDate) }))
+      const fetchArticleData = await axios.get(process.env.REACT_APP_API_HOST_URL + '/articles');
+      console.log(fetchArticleData.data);
+      
+      if (fetchArticleData.data.data) {
+        const dataFormatted = fetchArticleData.data.data.map(x => ({ ...x, publishedDate: new Date(x.publishedDate) }))
         setfilteredArticles(dataFormatted);
         setArticles(dataFormatted)
       }
