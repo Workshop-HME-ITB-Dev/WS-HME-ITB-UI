@@ -1,18 +1,15 @@
-import { useMutation } from "@apollo/client";
-import { DELETE_ARTICLE } from "../../../../graphql/articleQuery";
-import { DeleteArticlesResponse } from "../../../../graphql/articleQuery.types";
+import axios from "axios";
+import { configCreator } from "../../../../utils/configCreator";
 import { checkToken } from "../../../../utils/jwtvalidator";
 import { Article } from "../../../article/article.types";
 
-const ArticleDeleteModal = ({ formData, setFormData, setShowModal, setActionResult, refreshData }: ArticleDeleteModalProps): JSX.Element => {
-    const [deleteArticle] = useMutation<DeleteArticlesResponse>(DELETE_ARTICLE);
+const ArticleDeleteModal = ({ formData, setShowModal, setActionResult, refreshData }: ArticleDeleteModalProps): JSX.Element => {
 
     const onDelete = async (e): Promise<any> => {
         e.preventDefault();
         try {
-            // Mutate Delete gql
-            const article = await deleteArticle({ variables: { removeArticleId: formData.id } })
-            if (article.data) {
+            const article = await axios.delete(process.env.REACT_APP_API_HOST_URL + '/articles/' + formData.id, configCreator());
+            if (article.data.data) {
                 setActionResult({
                     title: "Success!",
                     desc: "Article Deleted successfully.",
