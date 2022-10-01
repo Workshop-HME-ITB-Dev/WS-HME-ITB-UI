@@ -1,12 +1,14 @@
 import { useMutation } from "@apollo/client";
+import axios from "axios";
 import { useState } from "react";
 import { CREATE_SHOP } from "../../../../graphql/shopQuery";
 import { CreateShopInput, CreateShopResponse } from "../../../../graphql/shopQuery.types";
+import { configCreator } from "../../../../utils/configCreator";
 import { checkToken } from "../../../../utils/jwtvalidator";
 import { validateShopForm } from "../../../../utils/shopFormValidator";
 import { Product, ProductError } from "../../../shop/shop.types";
 
-const ProductAddModal = ({ formData, setFormData, setShowModal, setActionResult, refreshData }: ProductAddModalProps): JSX.Element => {
+const ProductAddModal = ({ formData, setFormData, setShowModal, setActionResult, setShowAlert, refreshData }: ProductAddModalProps): JSX.Element => {
     const [addProduct] = useMutation<CreateShopResponse>(CREATE_SHOP);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<ProductError>({
@@ -21,19 +23,19 @@ const ProductAddModal = ({ formData, setFormData, setShowModal, setActionResult,
         setError(res);
         if (!err) {
             setLoading(true);
-            // Mutation gql
             try {
                 const variables: CreateShopInput = {
-                    createShopInput: {
-                        title: formData.title,
-                        imageUrl: formData.imageUrl,
-                        price: Number(formData.price),
-                        link: formData.link,
-                    }
+                    title: formData.title,
+                    imageUrl: formData.imageUrl,
+                    price: Number(formData.price),
+                    link: formData.link,
                 }
-                const shop = await addProduct({ variables })
-
-                if (shop.data) {
+                const shop = await axios.post(
+                    process.env.REACT_APP_API_HOST_URL + '/shops',
+                    variables,
+                    configCreator()
+                );
+                if (shop.data.data) {
                     // set Action Result
                     setActionResult({
                         title: "Success!",
@@ -54,6 +56,7 @@ const ProductAddModal = ({ formData, setFormData, setShowModal, setActionResult,
             setLoading(false);
             // Refresh data
             // leave the modal
+            setShowAlert(true);
             setShowModal(false);
             await refreshData();
             window.location.reload();
@@ -191,6 +194,7 @@ interface ProductAddModalProps {
     setFormData: Function;
     setShowModal: Function;
     setActionResult: Function;
+    setShowAlert: Function;
     refreshData: Function;
 }
 

@@ -14,14 +14,13 @@ import axios from "axios";
 
 
 const ShopDashboard = (): JSX.Element => {
-  const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
   const [showAlert, setShowAlert] = useState<boolean>(true);
+  const [alert, setAlert] = useState<null | AlertData>(null);
 
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setfilteredProducts] = useState<Product[]>([]);
   const [wordSearch, setWordSearch] = useState<string>('');
-  const [alert, setAlert] = useState<null | AlertData>(null);
   const [formData, setFormData] = useState<Product>(formReset)
 
   const [addModal, setAddModal] = useState<boolean>(false);
@@ -47,17 +46,22 @@ const ShopDashboard = (): JSX.Element => {
   }
 
   const refreshData = async (): Promise<any> => {
-    // gql fetch all articles
+    setLoading(true);
     try {
       const fetchProducts = await axios.get(process.env.REACT_APP_API_HOST_URL + '/shops');
 
       if (fetchProducts.data.data) {
         setfilteredProducts(fetchProducts.data.data);
         setProducts(fetchProducts.data.data)
+        setLoading(false);
       }
     } catch (e: any) {
       console.error(e.message);
-      setError(e.message);
+      setAlert({
+        title: 'ERROR',
+        desc: e.message,
+        type: 'error'
+      })
       setShowAlert(true);
       checkToken();
     }
@@ -68,15 +72,11 @@ const ShopDashboard = (): JSX.Element => {
   }, [])
   return (
     <>
-      {showAlert && <AlertCard data={{
-        title: 'ERROR',
-        desc: error,
-        type: 'error'
-      }} onClose={setShowAlert} />}
+      {showAlert && alert && <AlertCard data={alert} onClose={setShowAlert} />}
       <div className="h-full flex flex-col mx-auto justify-start">
-        {addModal && <ProductAddModal formData={formData} setFormData={setFormData} setShowModal={setAddModal} setActionResult={setAlert} refreshData={refreshData} />}
-        {editModal && <ProductEditModal formData={formData} setFormData={setFormData} setShowModal={setEditModal} setActionResult={setAlert} refreshData={refreshData} />}
-        {deleteModal && <ProductDeleteModal formData={formData} setFormData={setFormData} setShowModal={setDeleteModal} setActionResult={setAlert} refreshData={refreshData} />}
+        {addModal && <ProductAddModal formData={formData} setFormData={setFormData} setShowModal={setAddModal} setActionResult={setAlert} setShowAlert={setShowAlert} refreshData={refreshData} />}
+        {editModal && <ProductEditModal formData={formData} setFormData={setFormData} setShowModal={setEditModal} setActionResult={setAlert} setShowAlert={setShowAlert} refreshData={refreshData} />}
+        {deleteModal && <ProductDeleteModal formData={formData} setFormData={setFormData} setShowModal={setDeleteModal} setActionResult={setAlert} setShowAlert={setShowAlert} refreshData={refreshData} />}
         <SearchBar wordSearch={wordSearch} onChange={onWordSearchChange} placeholder={"Cari Produk"} />
         <div className="flex flex-row w-full justify-center items-center gap-x-6">
           <button className=" bg-sky-400 text-slate-700 hover:bg-sky-200 font-bold py-2 px-4 rounded-lg w-auto">

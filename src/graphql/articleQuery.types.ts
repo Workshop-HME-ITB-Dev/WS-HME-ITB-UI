@@ -10,6 +10,7 @@ export interface CreateArticleInput {
 }
 
 export interface UpdateArticleInput {
+    id : number;
     title: string;
     desc: string;
     imageUrl: string;

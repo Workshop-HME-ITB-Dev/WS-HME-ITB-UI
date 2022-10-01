@@ -1,19 +1,15 @@
-import { useMutation } from "@apollo/client";
-import { DELETE_SHOP } from "../../../../graphql/shopQuery";
-import { RemoveShopResponse } from "../../../../graphql/shopQuery.types";
+import axios from "axios";
+import { configCreator } from "../../../../utils/configCreator";
 import { checkToken } from "../../../../utils/jwtvalidator";
 import { Product } from "../../../shop/shop.types";
 
-const ProductDeleteModal = ({ formData, setFormData, setShowModal, setActionResult, refreshData }: ProductDeleteModalProps): JSX.Element => {
-    const [deleteProduct] = useMutation<RemoveShopResponse>(DELETE_SHOP);
-
+const ProductDeleteModal = ({ formData, setFormData, setShowModal, setActionResult, setShowAlert, refreshData }: ProductDeleteModalProps): JSX.Element => {
     const onDelete = async (e: any): Promise<any> => {
         e.preventDefault();
 
         try {
-            // Mutate Delete gql
-            const article = await deleteProduct({ variables: { removeShopId: formData.id } })
-            if (article.data) {
+            const shop = await axios.delete(process.env.REACT_APP_API_HOST_URL + '/shops/' + formData.id, configCreator());
+            if (shop.data.data) {
                 setActionResult({
                     title: "Success!",
                     desc: "Product Deleted successfully.",
@@ -31,6 +27,7 @@ const ProductDeleteModal = ({ formData, setFormData, setShowModal, setActionResu
             checkToken();
         }
         // leave the modal
+        setShowAlert(true);
         setShowModal(false);
         await refreshData();
         window.location.reload();
@@ -77,6 +74,7 @@ interface ProductDeleteModalProps {
     setFormData: Function;
     setShowModal: Function;
     setActionResult: Function;
+    setShowAlert: Function;
     refreshData: Function;
 }
 

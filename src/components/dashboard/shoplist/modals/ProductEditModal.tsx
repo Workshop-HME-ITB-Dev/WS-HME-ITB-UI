@@ -1,13 +1,12 @@
-import { useMutation } from "@apollo/client";
+import axios from "axios";
 import { useState } from "react";
-import { UPDATE_SHOP } from "../../../../graphql/shopQuery";
-import { UpdateShopInput, UpdateShopResponse } from "../../../../graphql/shopQuery.types";
+import { UpdateShopInput } from "../../../../graphql/shopQuery.types";
+import { configCreator } from "../../../../utils/configCreator";
 import { checkToken } from "../../../../utils/jwtvalidator";
 import { validateShopForm } from "../../../../utils/shopFormValidator";
 import { Product, ProductError } from "../../../shop/shop.types";
 
-const ProductEditModal = ({ formData, setFormData, setShowModal, setActionResult, refreshData }: ProductEditModalProps): JSX.Element => {
-    const [updateProduct] = useMutation<UpdateShopResponse>(UPDATE_SHOP);
+const ProductEditModal = ({ formData, setFormData, setShowModal, setActionResult, setShowAlert, refreshData }: ProductEditModalProps): JSX.Element => {
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<ProductError>({
         title: "",
@@ -21,20 +20,26 @@ const ProductEditModal = ({ formData, setFormData, setShowModal, setActionResult
         setError(res);
         if (!err) {
             setLoading(true);
-            // Mutation gql
             try {
                 const variables: UpdateShopInput = {
-                    updateShopInput: {
-                        id: formData.id,
-                        title: formData.title,
-                        imageUrl: formData.imageUrl,
-                        price: Number(formData.price),
-                        link: formData.link,
-                    }
+                    id: formData.id,
+                    title: formData.title,
+                    imageUrl: formData.imageUrl,
+                    price: Number(formData.price),
+                    link: formData.link,
                 }
-                const article = await updateProduct({ variables })
+                console.log(variables);
+                console.log(configCreator());
+                
+                const shop = await axios.put(
+                    process.env.REACT_APP_API_HOST_URL + '/shops/' + formData.id,
+                    variables,
+                    configCreator()
+                );
+                console.log(shop);
+                
 
-                if (article.data) {
+                if (shop.data.data) {
                     // set Action Result
                     setActionResult({
                         title: "Success!",
@@ -55,9 +60,10 @@ const ProductEditModal = ({ formData, setFormData, setShowModal, setActionResult
             setLoading(false);
             // Refresh data
             // leave the modal
+            setShowAlert(true);
             setShowModal(false);
             await refreshData();
-            window.location.reload();
+            // window.location.reload();
         }
     }
     const onChange = (e: any): void => {
@@ -192,6 +198,7 @@ interface ProductEditModalProps {
     setFormData: Function;
     setShowModal: Function;
     setActionResult: Function;
+    setShowAlert: Function;
     refreshData: Function;
 }
 

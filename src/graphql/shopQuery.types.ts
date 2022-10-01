@@ -1,22 +1,18 @@
-import { Product } from '../components/shop/shop.types';
+import { Product } from "../components/shop/shop.types";
 
 export interface CreateShopInput {
-  createShopInput: {
-    title: string;
-    imageUrl: string;
-    link: string;
-    price: number;
-  };
+  title: string;
+  imageUrl: string;
+  link: string;
+  price: number;
 }
 
 export interface UpdateShopInput {
-  updateShopInput: {
-    id: number;
-    title: string;
-    imageUrl: string;
-    link: string;
-    price: number;
-  };
+  id: number;
+  title: string;
+  imageUrl: string;
+  link: string;
+  price: number;
 }
 
 export interface GetShopResponse {

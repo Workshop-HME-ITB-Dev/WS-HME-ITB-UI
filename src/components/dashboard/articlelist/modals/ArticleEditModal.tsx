@@ -26,6 +26,7 @@ const ArticleEditModal = ({ formData, setFormData, setShowModal, setActionResult
             // Mutation gql
             try {
                 const variables: UpdateArticleInput = {
+                    id: formData.id,
                     title: formData.title,
                     desc: formData.desc,
                     imageUrl: formData.imageUrl,

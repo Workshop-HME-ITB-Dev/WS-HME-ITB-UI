@@ -48,8 +48,6 @@ const ArticleDashboard = (): JSX.Element => {
     setLoading(true);
     try {
       const fetchArticleData = await axios.get(process.env.REACT_APP_API_HOST_URL + '/articles');
-      console.log(fetchArticleData.data);
-
       if (fetchArticleData.data.data) {
         const dataFormatted = fetchArticleData.data.data.map(x => ({ ...x, publishedDate: new Date(x.publishedDate) }))
         setfilteredArticles(dataFormatted);
