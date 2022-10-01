@@ -7,7 +7,7 @@ import { configCreator } from "../../../../utils/configCreator";
 import { checkToken } from "../../../../utils/jwtvalidator";
 import { Article, ArticleError } from "../../../article/article.types";
 
-const ArticleAddModal = ({ formData, setFormData, setShowModal, setActionResult, refreshData }: ArticleAddModalProps): JSX.Element => {
+const ArticleAddModal = ({ formData, setFormData, setShowModal, setActionResult, setShowAlert, refreshData }: ArticleAddModalProps): JSX.Element => {
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<ArticleError>({
         title: "",
@@ -37,7 +37,6 @@ const ArticleAddModal = ({ formData, setFormData, setShowModal, setActionResult,
                     variables,
                     configCreator()
                 );
-                console.log(article);
 
                 if (article.data.data) {
                     // set Action Result
@@ -60,6 +59,7 @@ const ArticleAddModal = ({ formData, setFormData, setShowModal, setActionResult,
             setLoading(false);
             // Refresh data
             // leave the modal
+            setShowAlert(true);
             setShowModal(false);
             await refreshData();
             window.location.reload();
@@ -248,6 +248,7 @@ interface ArticleAddModalProps {
     setFormData: Function;
     setShowModal: Function;
     setActionResult: Function;
+    setShowAlert: Function;
     refreshData: Function;
 }
 

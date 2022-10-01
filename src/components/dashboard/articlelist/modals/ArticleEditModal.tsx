@@ -1,14 +1,13 @@
-import { useMutation } from "@apollo/client";
+import axios from "axios";
 import moment from "moment";
 import { useState } from "react";
-import { UPDATE_ARTICLE } from "../../../../graphql/articleQuery";
-import { UpdateArticleInput, UpdateArticleResponse } from "../../../../graphql/articleQuery.types";
+import { UpdateArticleInput } from "../../../../graphql/articleQuery.types";
 import { validateArticleForm } from "../../../../utils/articleFormValidator";
+import { configCreator } from "../../../../utils/configCreator";
 import { checkToken } from "../../../../utils/jwtvalidator";
 import { Article, ArticleError } from "../../../article/article.types";
 
-const ArticleEditModal = ({ formData, setFormData, setShowModal, setActionResult, refreshData }: ArticleEditModalProps): JSX.Element => {
-    const [updateArticle] = useMutation<UpdateArticleResponse>(UPDATE_ARTICLE);
+const ArticleEditModal = ({ formData, setFormData, setShowModal, setActionResult, setShowAlert, refreshData }: ArticleEditModalProps): JSX.Element => {
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<ArticleError>({
         title: "",
@@ -27,19 +26,20 @@ const ArticleEditModal = ({ formData, setFormData, setShowModal, setActionResult
             // Mutation gql
             try {
                 const variables: UpdateArticleInput = {
-                    updateArticleInput: {
-                        id: formData.id,
-                        title: formData.title,
-                        desc: formData.desc,
-                        imageUrl: formData.imageUrl,
-                        publishedDate: formData.publishedDate.toISOString(),
-                        duration: Number(formData.duration),
-                        link: formData.link,
-                    }
+                    title: formData.title,
+                    desc: formData.desc,
+                    imageUrl: formData.imageUrl,
+                    publishedDate: formData.publishedDate.toISOString(),
+                    duration: Number(formData.duration),
+                    link: formData.link,
                 }
-                const article = await updateArticle({ variables })
+                const article = await axios.put(
+                    process.env.REACT_APP_API_HOST_URL + '/articles/' + formData.id,
+                    variables,
+                    configCreator()
+                );
 
-                if (article.data) {
+                if (article.data.data) {
                     // set Action Result
                     setActionResult({
                         title: "Success!",
@@ -60,6 +60,7 @@ const ArticleEditModal = ({ formData, setFormData, setShowModal, setActionResult
             setLoading(false);
             // Refresh data
             // leave the modal
+            setShowAlert(true);
             setShowModal(false);
             await refreshData();
             window.location.reload();
@@ -247,6 +248,7 @@ interface ArticleEditModalProps {
     setFormData: Function;
     setShowModal: Function;
     setActionResult: Function;
+    setShowAlert: Function;
     refreshData: Function;
 }
 

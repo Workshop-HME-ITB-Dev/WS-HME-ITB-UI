@@ -9,14 +9,13 @@ import ProductDeleteModal from "./modals/ProductDeleteModal";
 import moment from "moment";
 import ProductAddModal from "./modals/ProductAddModal";
 import ProductEditModal from "./modals/ProductEditModal";
-import { useLazyQuery } from "@apollo/client";
-import { GET_SHOPS } from "../../../graphql/shopQuery";
-import { GetShopsResponse } from "../../../graphql/shopQuery.types";
 import { checkToken } from "../../../utils/jwtvalidator";
+import axios from "axios";
 
 
 const ShopDashboard = (): JSX.Element => {
-  const [getProducts, { loading, error }] = useLazyQuery<GetShopsResponse>(GET_SHOPS, { fetchPolicy: 'cache-and-network' });
+  const [error, setError] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(true);
   const [showAlert, setShowAlert] = useState<boolean>(true);
 
   const [products, setProducts] = useState<Product[]>([]);
@@ -50,14 +49,16 @@ const ShopDashboard = (): JSX.Element => {
   const refreshData = async (): Promise<any> => {
     // gql fetch all articles
     try {
-      const fetchProducts = await getProducts();
-      if (fetchProducts.data) {
-        setfilteredProducts(fetchProducts.data.shops);
-        setProducts(fetchProducts.data.shops)
+      const fetchProducts = await axios.get(process.env.REACT_APP_API_HOST_URL + '/shops');
+
+      if (fetchProducts.data.data) {
+        setfilteredProducts(fetchProducts.data.data);
+        setProducts(fetchProducts.data.data)
       }
     } catch (e: any) {
       console.error(e.message);
-      setAlert(e.message);
+      setError(e.message);
+      setShowAlert(true);
       checkToken();
     }
     setWordSearch('');
@@ -67,10 +68,9 @@ const ShopDashboard = (): JSX.Element => {
   }, [])
   return (
     <>
-      {alert && <AlertCard data={alert} onClose={setAlert} />}
-      {showAlert && error && <AlertCard data={{
+      {showAlert && <AlertCard data={{
         title: 'ERROR',
-        desc: error.message,
+        desc: error,
         type: 'error'
       }} onClose={setShowAlert} />}
       <div className="h-full flex flex-col mx-auto justify-start">

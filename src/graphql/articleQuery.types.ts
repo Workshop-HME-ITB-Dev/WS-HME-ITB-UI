@@ -10,15 +10,12 @@ export interface CreateArticleInput {
 }
 
 export interface UpdateArticleInput {
-  updateArticleInput: {
-    id: number;
     title: string;
     desc: string;
     imageUrl: string;
     publishedDate: string;
     duration: number;
     link: string;
-  };
 }
 
 export interface GetArticlesResponse {

@@ -3,7 +3,7 @@ import { configCreator } from "../../../../utils/configCreator";
 import { checkToken } from "../../../../utils/jwtvalidator";
 import { Article } from "../../../article/article.types";
 
-const ArticleDeleteModal = ({ formData, setShowModal, setActionResult, refreshData }: ArticleDeleteModalProps): JSX.Element => {
+const ArticleDeleteModal = ({ formData, setShowModal, setActionResult, setShowAlert, refreshData }: ArticleDeleteModalProps): JSX.Element => {
 
     const onDelete = async (e): Promise<any> => {
         e.preventDefault();
@@ -27,6 +27,7 @@ const ArticleDeleteModal = ({ formData, setShowModal, setActionResult, refreshDa
             checkToken();
         }
         // leave the modal
+        setShowAlert(true);
         setShowModal(false);
         await refreshData();
         window.location.reload();
@@ -73,6 +74,7 @@ interface ArticleDeleteModalProps {
     setFormData: Function;
     setShowModal: Function;
     setActionResult: Function;
+    setShowAlert: Function;
     refreshData: Function;
 }
 

@@ -9,21 +9,17 @@ import ArticleDeleteModal from "./modals/ArticleDeleteModal";
 import AlertCard from "../basiccomponent/AlertCard";
 import { AlertData } from "../basiccomponent/basic.types";
 import moment from "moment";
-import { GET_ARTICLES } from "../../../graphql/articleQuery";
-import { GetArticlesResponse } from "../../../graphql/articleQuery.types";
-import { useLazyQuery } from "@apollo/client";
 import { checkToken } from "../../../utils/jwtvalidator";
 import axios from "axios";
 
 const ArticleDashboard = (): JSX.Element => {
-  const [getArticles, { loading, error }] = useLazyQuery<GetArticlesResponse>(GET_ARTICLES, { fetchPolicy: 'cache-and-network' });
-
+  const [loading, setLoading] = useState<boolean>(true);
   const [showAlert, setShowAlert] = useState<boolean>(true);
+  const [alert, setAlert] = useState<null | AlertData>(null);
 
   const [articles, setArticles] = useState<Article[]>([]);
   const [filteredArticles, setfilteredArticles] = useState<Article[]>([]);
   const [wordSearch, setWordSearch] = useState<string>('');
-  const [alert, setAlert] = useState<null | AlertData>(null);
   const [formData, setFormData] = useState<Article>(formReset)
 
   const [addModal, setAddModal] = useState<boolean>(false);
@@ -49,18 +45,25 @@ const ArticleDashboard = (): JSX.Element => {
   }
 
   const refreshData = async (): Promise<any> => {
+    setLoading(true);
     try {
       const fetchArticleData = await axios.get(process.env.REACT_APP_API_HOST_URL + '/articles');
       console.log(fetchArticleData.data);
-      
+
       if (fetchArticleData.data.data) {
         const dataFormatted = fetchArticleData.data.data.map(x => ({ ...x, publishedDate: new Date(x.publishedDate) }))
         setfilteredArticles(dataFormatted);
         setArticles(dataFormatted)
+        setLoading(false);
       }
     } catch (e: any) {
       console.error(e.message);
-      setAlert(e.message);
+      setAlert({
+        title: 'ERROR',
+        desc: e.message,
+        type: 'error'
+      })
+      setShowAlert(true);
       checkToken();
     }
     setWordSearch('');
@@ -70,16 +73,11 @@ const ArticleDashboard = (): JSX.Element => {
   }, [])
   return (
     <>
-      {alert && <AlertCard data={alert} onClose={setAlert} />}
-      {showAlert && error && <AlertCard data={{
-        title: 'ERROR',
-        desc: error.message,
-        type: 'error'
-      }} onClose={setShowAlert} />}
+      {showAlert && alert && <AlertCard data={alert} onClose={setShowAlert} />}
       <div className="h-full flex flex-col mx-auto">
-        {addModal && <ArticleAddModal formData={formData} setFormData={setFormData} setShowModal={setAddModal} setActionResult={setAlert} refreshData={refreshData} />}
-        {editModal && <ArticleEditModal formData={formData} setFormData={setFormData} setShowModal={setEditModal} setActionResult={setAlert} refreshData={refreshData} />}
-        {deleteModal && <ArticleDeleteModal formData={formData} setFormData={setFormData} setShowModal={setDeleteModal} setActionResult={setAlert} refreshData={refreshData} />}
+        {addModal && <ArticleAddModal formData={formData} setFormData={setFormData} setShowModal={setAddModal} setActionResult={setAlert} setShowAlert={setShowAlert} refreshData={refreshData} />}
+        {editModal && <ArticleEditModal formData={formData} setFormData={setFormData} setShowModal={setEditModal} setActionResult={setAlert} setShowAlert={setShowAlert} refreshData={refreshData} />}
+        {deleteModal && <ArticleDeleteModal formData={formData} setFormData={setFormData} setShowModal={setDeleteModal} setActionResult={setAlert} setShowAlert={setShowAlert} refreshData={refreshData} />}
         <SearchBar wordSearch={wordSearch} onChange={onWordSearchChange} placeholder={"Cari Artikel"} />
         <div className="flex flex-row w-full justify-center items-center gap-x-6">
           <button className=" bg-sky-400 text-slate-700 hover:bg-sky-200 font-bold py-2 px-4 rounded-lg w-auto">
