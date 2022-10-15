@@ -1,13 +1,11 @@
 import { useQuery } from '@apollo/client';
+import axios from 'axios';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
-import { GET_RENT_DATES } from '../../../graphql/rentQuery';
-import { GetRentDatesResponse } from '../../../graphql/rentQuery.types';
-import { GetToolsResponse } from '../../../graphql/toolQuery.types';
-import { GET_TOOLS } from '../../../graphql/toolsQuery';
 import AlertCard from '../../dashboard/basiccomponent/AlertCard';
+import { AlertData } from '../../dashboard/basiccomponent/basic.types';
 import Spinner from '../../Spinner';
-import { StepProps, ToolRent } from '..//rent.types';
+import { RentRestricted, StepProps, Tool, ToolRent } from '..//rent.types';
 import ToolCard from './ToolCard';
 
 const Step3 = ({
@@ -16,33 +14,47 @@ const Step3 = ({
   error,
   setError
 }: StepProps): JSX.Element => {
-  const { error: gqlToolsError, data: gqlToolsData, refetch: refetchTools } = useQuery<GetToolsResponse>(GET_TOOLS, { fetchPolicy: 'cache-and-network' });
-  const { error: gqlRentsError, data: gqlRentsData, refetch: refetchRents } = useQuery<GetRentDatesResponse>(GET_RENT_DATES, { fetchPolicy: 'cache-and-network' });
+
+  const [loading, setLoading] = useState<boolean>(true);
   const [showAlert, setShowAlert] = useState<boolean>(true);
+  const [alert, setAlert] = useState<null | AlertData>(null);
+
+
+
+  const [rents, setRents] = useState<RentRestricted[]>([]);
+  const [tools, setTools] = useState<Tool[]>([]);
   const refreshData = async () => {
-    await refetchTools();
-    await refetchRents();
+    setLoading(true);
+    try {
+      const fetchRentsData = await axios.get(process.env.REACT_APP_API_HOST_URL + '/restrict/rents');
+      const fetchToolsData = await axios.get(process.env.REACT_APP_API_HOST_URL + '/tools');
+
+      if (fetchRentsData.data.data && fetchToolsData.data.data) {
+        setRents(fetchRentsData.data.data)
+        setTools(fetchToolsData.data.data)
+        setLoading(false);
+      }
+    } catch (e: any) {
+      console.error(e.message);
+      setAlert({
+        title: 'ERROR',
+        desc: e.message,
+        type: 'error'
+      })
+      setShowAlert(true);
+    }
   }
   useEffect(() => {
     refreshData();
   }, []);
   return (
     <>
-      {showAlert && gqlToolsError && <AlertCard data={{
-        title: 'ERROR',
-        desc: gqlToolsError.message,
-        type: 'error'
-      }} onClose={setShowAlert} />}
-      {showAlert && gqlRentsError && <AlertCard data={{
-        title: 'ERROR',
-        desc: gqlRentsError.message,
-        type: 'error'
-      }} onClose={setShowAlert} />}
+      {showAlert && alert && <AlertCard data={alert} onClose={setShowAlert} />}
 
       <div className="flex flex-wrap justify-center items-start w-full px-4 py-2">
-        {!(gqlRentsData && gqlToolsData) ? <Spinner color='text-ws-orange' /> : <>
+        {loading ? <Spinner color='text-ws-orange' /> : <>
           {
-            gqlToolsData?.tools.filter((item) => item.totalStock > 0 && item.activated).map((item) => {
+            tools?.filter((item) => item.totalStock > 0 && item.activated).map((item) => {
               let updatedStock = item.totalStock;
               // count overlap from rents rentPickupDate<pickupDate<rentReturnDate or rentPickupDate<returnDate<rentReturnDate 
               let overlap = 0
@@ -58,7 +70,7 @@ const Step3 = ({
               // filter rents data, only in waiting_pickup and waiting_return
               // for each rent checked, check overlap if there's tools inside rent, cond above met (overlapping dates),
               // overlap equals number of quantity of that tool rented by the rent
-              const rentDataFiltered = gqlRentsData?.rentdates.filter(x => (x.status === 'waiting_pickup' || x.status === 'waiting_return'));
+              const rentDataFiltered = rents?.filter(x => (x.status === 'waiting_pickup' || x.status === 'waiting_return'));
               rentDataFiltered?.forEach(rent => {
                 const rentToolsParsed: ToolRent[] = JSON.parse(rent.tools);
 

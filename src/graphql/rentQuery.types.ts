@@ -1,18 +1,16 @@
 import { RentDateRaw, RentRaw } from "../components/rent/rent.types";
 
 export interface CreateRentInput {
-  createRentInput: {
-    tools: string;
-    rentName: string;
-    rentNim: string;
-    rentPhone: string;
-    rentLineId: string;
-    organisation: string;
-    fromDate: string;
-    expectedReturnDate: string;
-    status: string;
-    totalPrice: number;
-  };
+  tools: string;
+  rentName: string;
+  rentNim: string;
+  rentPhone: string;
+  rentLineId: string;
+  organisation: string;
+  fromDate: string;
+  expectedReturnDate: string;
+  status: string;
+  totalPrice: number;
 }
 
 export interface UpdateRentInput {

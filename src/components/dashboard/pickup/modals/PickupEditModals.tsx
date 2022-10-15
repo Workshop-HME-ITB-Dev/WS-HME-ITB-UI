@@ -1,7 +1,5 @@
-import { useMutation } from "@apollo/client";
 import axios from "axios";
 import { useState } from "react";
-import { UPDATE_RENT } from "../../../../graphql/rentQuery";
 import { UpdateRentInput } from "../../../../graphql/rentQuery.types";
 import { configCreator } from "../../../../utils/configCreator";
 import { checkToken } from "../../../../utils/jwtvalidator";

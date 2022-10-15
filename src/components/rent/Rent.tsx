@@ -12,15 +12,15 @@ import StepRent from './StepRent';
 import moment from 'moment';
 import ModalPanduan from './ModalPanduan';
 import { validateRentFormError } from '../../utils/rentFormValidator';
-import { useMutation } from '@apollo/client';
-import { CREATE_RENT } from '../../graphql/rentQuery';
 import AlertCard from '../dashboard/basiccomponent/AlertCard';
-import { CreateRentInput, CreateRentResponse } from '../../graphql/rentQuery.types';
+import { CreateRentInput } from '../../graphql/rentQuery.types';
 import axios from 'axios';
+import { configCreator } from '../../utils/configCreator';
+import { AlertData } from '../dashboard/basiccomponent/basic.types';
 
 const Rent = (): JSX.Element => {
-  const [createRent, { error: gqlError }] = useMutation<CreateRentResponse>(CREATE_RENT);
   const [showAlert, setShowAlert] = useState<boolean>(true);
+  const [alert, setAlert] = useState<null | AlertData>(null);
 
   const [showModal, setShowModal] = useState<boolean>(false);
   const [step, setStep] = useState<number>(0);
@@ -52,28 +52,33 @@ const Rent = (): JSX.Element => {
 
     try {
       const variables: CreateRentInput = {
-        createRentInput: {
-          tools: JSON.stringify(formData.tools),
-          rentName: formData.name,
-          rentNim: formData.nim,
-          rentPhone: formData.phone,
-          rentLineId: formData.line,
-          organisation: formData.organisation,
-          fromDate: pickupDate.toISOString(),
-          expectedReturnDate: returnDate.toISOString(),
-          status: 'waiting_pickup',
-          totalPrice: formData.totalPrice
-        }
+        tools: JSON.stringify(formData.tools),
+        rentName: formData.name,
+        rentNim: formData.nim,
+        rentPhone: formData.phone,
+        rentLineId: formData.line,
+        organisation: formData.organisation,
+        fromDate: pickupDate.toISOString(),
+        expectedReturnDate: returnDate.toISOString(),
+        status: 'waiting_pickup',
+        totalPrice: formData.totalPrice
       }
-      const rent = await createRent({ variables })
+      const rent = await axios.post(process.env.REACT_APP_API_HOST_URL + '/rents', variables, configCreator());
+
       await new Promise(r => setTimeout(r, 500));
       // if success
-      if (rent.data) {
+      if (rent.data.data) {
         setStep(4);
       }
     }
     catch (e: any) {
       console.error(e.message);
+      setAlert({
+        title: 'ERROR',
+        desc: e.message,
+        type: 'error'
+      })
+      setShowAlert(true);
     }
     setLoading(false);
   };
@@ -116,11 +121,8 @@ const Rent = (): JSX.Element => {
         <NavBar selected="rent" />
         <main className="flex h-full w-full mb-auto">
           <ModalPanduan showModal={showModal} setShowModal={setShowModal} />
-          {showAlert && gqlError && <AlertCard data={{
-            title: 'ERROR',
-            desc: gqlError.message,
-            type: 'error'
-          }} onClose={setShowAlert} />}
+          {showAlert && alert && <AlertCard data={alert} onClose={setShowAlert} />}
+
           <div className="flex flex-col max-w-7xl justify-start mx-auto px-6">
             <h1 className="font-sans text-4xl font-semibold text-gray-800 mx-auto mt-4 mb-4">
               Rent

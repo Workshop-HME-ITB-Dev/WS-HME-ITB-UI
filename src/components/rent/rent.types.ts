@@ -88,6 +88,13 @@ export interface Rent {
   returnDate?: null | Date;
 }
 
+export interface RentRestricted {
+  tools: string;
+  fromDate: Date;
+  expectedReturnDate: Date;
+  status: string;
+}
+
 export interface RentRaw {
   id: number;
   tools: string;

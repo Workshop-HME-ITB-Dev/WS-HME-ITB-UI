@@ -1,12 +1,11 @@
-import { useLazyQuery, useQuery } from '@apollo/client';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
 import { calculateBetweenTwoDate, calculatePrices, numberToIDR } from '../../../utils/utils';
-import { GetToolsResponse } from '../../../graphql/toolQuery.types';
-import { GET_TOOLS } from '../../../graphql/toolsQuery';
 import AlertCard from '../../dashboard/basiccomponent/AlertCard';
 import Spinner from '../../Spinner';
 import { StepProps, Tool } from '..//rent.types';
+import { AlertData } from '../../dashboard/basiccomponent/basic.types';
+import axios from 'axios';
 
 const Step4 = ({
   formData,
@@ -14,8 +13,12 @@ const Step4 = ({
   error,
   setError
 }: StepProps): JSX.Element => {
-  const [getTools, { loading: gqlToolsLoading, error: gqlToolsError, data: gqlToolsData }] = useLazyQuery<GetToolsResponse>(GET_TOOLS, { fetchPolicy: 'cache-and-network' });
+  const [loading, setLoading] = useState<boolean>(true);
   const [showAlert, setShowAlert] = useState<boolean>(true);
+  const [alert, setAlert] = useState<null | AlertData>(null);
+
+  const [tools, setTools] = useState<Tool[]>([]);
+
   const pickupDate = new Date(formData.pickupDate);
   pickupDate.setHours(Number(formData.pickupHour));
   pickupDate.setMinutes(Number(formData.pickupMinute));
@@ -25,16 +28,27 @@ const Step4 = ({
   const [days, hours] = calculateBetweenTwoDate(pickupDate, returnDate);
 
   const refreshData = async () => {
-    const toolsData = await getTools();
-    if (!gqlToolsLoading && toolsData.data) {
-      setFormData(formData => ({ ...formData, totalPrice: calculatePrices(formData.tools, toolsData.data?.tools as Tool[], days, hours) }))
+    setLoading(true);
+    try {
+      const fetchToolsData = await axios.get(process.env.REACT_APP_API_HOST_URL + '/tools');
+      if (fetchToolsData.data.data) {
+        setTools(fetchToolsData.data.data);
+        setFormData(formData => ({ ...formData, totalPrice: calculatePrices(formData.tools, fetchToolsData.data?.data as Tool[], days, hours) }))
+        setLoading(false);
+      }
+    } catch (e: any) {
+      console.error(e.message);
+      setAlert({
+        title: 'ERROR',
+        desc: e.message,
+        type: 'error'
+      })
+      setShowAlert(true);
     }
   }
+
   useEffect(() => {
     refreshData();
-    console.log(formData);
-    console.log(formData);
-
   }, [])
 
   return <>
@@ -46,13 +60,10 @@ const Step4 = ({
         <span className="block text-center">{error.totalPrice}</span>
       </div>
     )}
-    {showAlert && gqlToolsError && <AlertCard data={{
-      title: 'ERROR',
-      desc: gqlToolsError.message,
-      type: 'error'
-    }} onClose={setShowAlert} />}
+    {showAlert && alert && <AlertCard data={alert} onClose={setShowAlert} />}
 
-    {gqlToolsLoading ? <Spinner color='text-ws-orange' /> :
+
+    {loading ? <Spinner color='text-ws-orange' /> :
       <div className="overflow-x-auto overflow-x-hidden px-4">
         <table className="items-center w-full bg-transparent border-collapse mb-4">
           <thead>
@@ -166,7 +177,7 @@ const Step4 = ({
               <th key="toolsValue" className="border-b border-ws-orange align-middle font-normal text-sm whitespace-nowrap px-2 py-2 text-right">
                 <ul>
                   {formData.tools.map(tool => {
-                    const findTool = gqlToolsData?.tools.find(x => x.id === tool.toolId)
+                    const findTool = tools?.find(x => x.id === tool.toolId)
                     if (!findTool) {
                       return <></>
                     }
@@ -187,7 +198,7 @@ const Step4 = ({
                 :
               </th>
               <th key="priceValue" className="border-b border-ws-orange align-middle font-normal text-sm whitespace-nowrap px-2 py-2 text-right">
-                {gqlToolsData && numberToIDR(calculatePrices(formData.tools, gqlToolsData.tools, days, hours))}
+                {tools && numberToIDR(calculatePrices(formData.tools, tools, days, hours))}
               </th>
             </tr>
           </tbody>
