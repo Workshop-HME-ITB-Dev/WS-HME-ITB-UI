@@ -5,6 +5,7 @@ import { ErrorRegisterForm, RegisterForm } from "./auth.types";
 import { validateRegisterForm } from "../../utils/authFormValidator";
 import { CreateAdminInput } from "../../graphql/adminQuery.types";
 import axios from "axios";
+import { configCreator } from "../../utils/configCreator";
 
 const Register = (): JSX.Element => {
   const navigate = useNavigate();
@@ -42,7 +43,7 @@ const Register = (): JSX.Element => {
           password: formData.password
       }
       try {
-        const registerData = await axios.post(process.env.REACT_APP_API_HOST_URL + '/admins', variables);
+        const registerData = await axios.post(process.env.REACT_APP_API_HOST_URL + '/admins', variables, configCreator());
         // if success
         if (registerData.data) {
           // Add wait for redirecting to login
