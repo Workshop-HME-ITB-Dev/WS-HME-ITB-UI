@@ -6,7 +6,6 @@ import { Product } from "../../../shop/shop.types";
 const ProductDeleteModal = ({ formData, setFormData, setShowModal, setActionResult, setShowAlert, refreshData }: ProductDeleteModalProps): JSX.Element => {
     const onDelete = async (e: any): Promise<any> => {
         e.preventDefault();
-
         try {
             const shop = await axios.delete(process.env.REACT_APP_API_HOST_URL + '/shops/' + formData.id, configCreator());
             if (shop.data.data) {

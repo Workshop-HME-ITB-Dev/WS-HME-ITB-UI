@@ -1,19 +1,14 @@
-import { useMutation } from "@apollo/client";
-import { DELETE_RENT } from "../../../../graphql/rentQuery";
-import { RemoveRentResponse } from "../../../../graphql/rentQuery.types";
+import axios from "axios";
+import { configCreator } from "../../../../utils/configCreator";
 import { checkToken } from "../../../../utils/jwtvalidator";
 import { Rent } from "../../../rent/rent.types";
 
-const LogDeleteModal = ({ formData, setFormData, setShowModal, setActionResult, refreshData }: LogDeleteModalProps): JSX.Element => {
-    const [deleteRent] = useMutation<RemoveRentResponse>(DELETE_RENT);
-
+const LogDeleteModal = ({ formData, setFormData, setShowModal, setActionResult, setShowAlert, refreshData }: LogDeleteModalProps): JSX.Element => {
     const onDelete = async (e: any): Promise<any> => {
         e.preventDefault();
-
         try {
-            // Mutate Delete gql
-            const rent = await deleteRent({ variables: { removeRentId: formData.id } })
-            if (rent.data) {
+            const rent = await axios.delete(process.env.REACT_APP_API_HOST_URL + '/rents/' + formData.id, configCreator());
+            if (rent.data.data) {
                 setActionResult({
                     title: "Success!",
                     desc: "Rent Log Deleted successfully.",
@@ -31,6 +26,7 @@ const LogDeleteModal = ({ formData, setFormData, setShowModal, setActionResult, 
             checkToken();
         }
         // leave the modal
+        setShowAlert(true);
         setShowModal(false);
         await refreshData();
         window.location.reload();
@@ -77,6 +73,7 @@ interface LogDeleteModalProps {
     setFormData: Function;
     setShowModal: Function;
     setActionResult: Function;
+    setShowAlert: Function;
     refreshData: Function;
 }
 

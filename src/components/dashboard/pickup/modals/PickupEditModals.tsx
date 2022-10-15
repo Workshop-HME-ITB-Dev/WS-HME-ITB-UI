@@ -1,13 +1,14 @@
 import { useMutation } from "@apollo/client";
+import axios from "axios";
 import { useState } from "react";
 import { UPDATE_RENT } from "../../../../graphql/rentQuery";
 import { UpdateRentInput } from "../../../../graphql/rentQuery.types";
+import { configCreator } from "../../../../utils/configCreator";
 import { checkToken } from "../../../../utils/jwtvalidator";
 import { validatePickupForm } from "../../../../utils/rentDashboardValidator";
 import { Rent, RentPickupError } from "../../../rent/rent.types";
 
-const PickupEditModal = ({ formData, setFormData, setShowModal, setActionResult, refreshData }: PickupEditModalProps): JSX.Element => {
-    const [updatePickup] = useMutation<UpdateRentInput>(UPDATE_RENT);
+const PickupEditModal = ({ formData, setFormData, setShowModal, setActionResult, setShowAlert, refreshData }: PickupEditModalProps): JSX.Element => {
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<RentPickupError>({
         pickupName: '',
@@ -22,26 +23,24 @@ const PickupEditModal = ({ formData, setFormData, setShowModal, setActionResult,
             try {
                 // gql mutation
                 const variables: UpdateRentInput = {
-                    updateRentInput: {
-                        id: formData.id,
-                        rentName: formData.rentName,
-                        rentNim: formData.rentNim,
-                        rentPhone: formData.rentPhone,
-                        rentLineId: formData.rentLineId,
-                        organisation: formData.organisation,
-                        fromDate: formData.fromDate.toISOString(),
-                        expectedReturnDate: formData.expectedReturnDate.toISOString(),
-                        status: 'waiting_return',
-                        totalPrice: formData.totalPrice,
-                        pickupName: formData.pickupName,
-                        pickupNim: formData.pickupNim,
-                        fine: 0,
-                        returnName: '',
-                        returnNim: '',
-                        returnDate: ''
-                    }
+                    id: formData.id,
+                    rentName: formData.rentName,
+                    rentNim: formData.rentNim,
+                    rentPhone: formData.rentPhone,
+                    rentLineId: formData.rentLineId,
+                    organisation: formData.organisation,
+                    fromDate: formData.fromDate.toISOString(),
+                    expectedReturnDate: formData.expectedReturnDate.toISOString(),
+                    status: 'waiting_return',
+                    totalPrice: formData.totalPrice,
+                    pickupName: formData.pickupName,
+                    pickupNim: formData.pickupNim,
+                    fine: 0,
+                    returnName: '',
+                    returnNim: '',
+                    returnDate: ''
                 }
-                const rent = await updatePickup({ variables })
+                const rent = await axios.put(process.env.REACT_APP_API_HOST_URL + '/rents/' + formData.id, variables, configCreator());
                 if (rent.data) {
                     setActionResult({
                         title: "Success!",
@@ -61,8 +60,7 @@ const PickupEditModal = ({ formData, setFormData, setShowModal, setActionResult,
             }
             await new Promise(r => setTimeout(r, 500));
             setLoading(false);
-            // Refresh data 
-            // leave the modal
+            setShowAlert(true);
             setShowModal(false);
             await refreshData();
             window.location.reload();
@@ -159,6 +157,7 @@ interface PickupEditModalProps {
     setFormData: Function;
     setShowModal: Function;
     setActionResult: Function;
+    setShowAlert: Function;
     refreshData: Function;
 }
 

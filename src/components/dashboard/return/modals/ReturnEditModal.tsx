@@ -1,13 +1,12 @@
-import { useMutation } from "@apollo/client";
+import axios from "axios";
 import { useState } from "react";
-import { UPDATE_RENT } from "../../../../graphql/rentQuery";
 import { UpdateRentInput } from "../../../../graphql/rentQuery.types";
+import { configCreator } from "../../../../utils/configCreator";
 import { checkToken } from "../../../../utils/jwtvalidator";
 import { validateReturnForm } from "../../../../utils/rentDashboardValidator";
 import { Rent, RentReturnError } from "../../../rent/rent.types";
 
-const ReturnEditModal = ({ formData, setFormData, setShowModal, setActionResult, refreshData }: ReturnEditModalProps): JSX.Element => {
-    const [updatePickup] = useMutation<UpdateRentInput>(UPDATE_RENT);
+const ReturnEditModal = ({ formData, setFormData, setShowModal, setActionResult, setShowAlert, refreshData }: ReturnEditModalProps): JSX.Element => {
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<RentReturnError>({
         returnName: '',
@@ -20,29 +19,26 @@ const ReturnEditModal = ({ formData, setFormData, setShowModal, setActionResult,
         if (!err) {
             setLoading(true);
             try {
-                // gql mutation
                 const variables: UpdateRentInput = {
-                    updateRentInput: {
-                        id: formData.id,
-                        rentName: formData.rentName,
-                        rentNim: formData.rentNim,
-                        rentPhone: formData.rentPhone,
-                        rentLineId: formData.rentLineId,
-                        organisation: formData.organisation,
-                        fromDate: formData.fromDate.toISOString(),
-                        expectedReturnDate: formData.expectedReturnDate.toISOString(),
-                        status: 'finished',
-                        totalPrice: formData.totalPrice,
-                        pickupName: formData.pickupName,
-                        pickupNim: formData.pickupNim,
-                        fine: formData.fine,
-                        returnName: formData.returnName,
-                        returnNim: formData.returnNim,
-                        returnDate: (new Date()).toISOString()
-                    }
+                    id: formData.id,
+                    rentName: formData.rentName,
+                    rentNim: formData.rentNim,
+                    rentPhone: formData.rentPhone,
+                    rentLineId: formData.rentLineId,
+                    organisation: formData.organisation,
+                    fromDate: formData.fromDate.toISOString(),
+                    expectedReturnDate: formData.expectedReturnDate.toISOString(),
+                    status: 'finished',
+                    totalPrice: formData.totalPrice,
+                    pickupName: formData.pickupName,
+                    pickupNim: formData.pickupNim,
+                    fine: formData.fine,
+                    returnName: formData.returnName,
+                    returnNim: formData.returnNim,
+                    returnDate: (new Date()).toISOString()
                 }
-                const rent = await updatePickup({ variables })
-                if (rent.data) {
+                const rent = await axios.put(process.env.REACT_APP_API_HOST_URL + '/rents/' + formData.id, variables, configCreator());
+                if (rent.data.data) {
                     setActionResult({
                         title: "Success!",
                         desc: "Return updated successfully.",
@@ -61,11 +57,10 @@ const ReturnEditModal = ({ formData, setFormData, setShowModal, setActionResult,
             }
             await new Promise(r => setTimeout(r, 500));
             setLoading(false);
-            // Refresh data 
-            // leave the modal
+            setShowAlert(true);
             setShowModal(false);
             await refreshData();
-            window.location.reload();
+            // window.location.reload();
         }
     }
     const onChange = (e: any): void => {
@@ -159,6 +154,7 @@ interface ReturnEditModalProps {
     setFormData: Function;
     setShowModal: Function;
     setActionResult: Function;
+    setShowAlert: Function;
     refreshData: Function;
 }
 

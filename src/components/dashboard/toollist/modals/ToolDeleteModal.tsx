@@ -19,7 +19,7 @@ const ToolDeleteModal = ({ formData, setFormData, setShowModal, setActionResult,
                 priceHour: Number(formData.priceHour),
                 priceDay: Number(formData.priceDay),
             }
-            const tool = await axios.delete(process.env.REACT_APP_API_HOST_URL + '/tools/' + formData.id, configCreator());
+            const tool = await axios.put(process.env.REACT_APP_API_HOST_URL + '/tools/' + formData.id, variables, configCreator());
 
             if (tool.data.data) {
                 setActionResult({

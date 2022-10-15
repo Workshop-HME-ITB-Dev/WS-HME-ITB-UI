@@ -1,38 +1,34 @@
-import { useMutation } from "@apollo/client";
-import { UPDATE_RENT } from "../../../../graphql/rentQuery";
+import axios from "axios";
 import { UpdateRentInput } from "../../../../graphql/rentQuery.types";
+import { configCreator } from "../../../../utils/configCreator";
 import { checkToken } from "../../../../utils/jwtvalidator";
 import { Rent } from "../../../rent/rent.types";
 
-const PickupDropModals = ({ formData, setFormData, setShowModal, setActionResult, refreshData }: PickupDropModalsProps): JSX.Element => {
-    const [updatePickup] = useMutation<UpdateRentInput>(UPDATE_RENT);
-
+const PickupDropModals = ({ formData, setFormData, setShowModal, setActionResult, setShowAlert, refreshData }: PickupDropModalsProps): JSX.Element => {
     const onDelete = async (e: any): Promise<any> => {
         e.preventDefault()
         try {
-            // gql mutation
             const variables: UpdateRentInput = {
-                updateRentInput: {
-                    id: formData.id,
-                    rentName: formData.rentName,
-                    rentNim: formData.rentNim,
-                    rentPhone: formData.rentPhone,
-                    rentLineId: formData.rentLineId,
-                    organisation: formData.organisation,
-                    fromDate: formData.fromDate.toISOString(),
-                    expectedReturnDate: formData.expectedReturnDate.toISOString(),
-                    status: 'dropped',
-                    totalPrice: formData.totalPrice,
-                    pickupName: '',
-                    pickupNim: '',
-                    fine: 0,
-                    returnName: '',
-                    returnNim: '',
-                    returnDate: ''
-                }
+                id: formData.id,
+                rentName: formData.rentName,
+                rentNim: formData.rentNim,
+                rentPhone: formData.rentPhone,
+                rentLineId: formData.rentLineId,
+                organisation: formData.organisation,
+                fromDate: formData.fromDate.toISOString(),
+                expectedReturnDate: formData.expectedReturnDate.toISOString(),
+                status: 'dropped',
+                totalPrice: formData.totalPrice,
+                pickupName: '',
+                pickupNim: '',
+                fine: 0,
+                returnName: '',
+                returnNim: '',
+                returnDate: ''
             }
-            const rent = await updatePickup({ variables })
-            if (rent.data) {
+            const rent = await axios.put(process.env.REACT_APP_API_HOST_URL + '/rents/' + formData.id, variables, configCreator());
+
+            if (rent.data.data) {
                 setActionResult({
                     title: "Success!",
                     desc: "Rent Dropped successfully.",
@@ -50,8 +46,7 @@ const PickupDropModals = ({ formData, setFormData, setShowModal, setActionResult
             checkToken();
         }
         await new Promise(r => setTimeout(r, 500));
-        // Refresh data 
-        // leave the modal
+        setShowAlert(true);
         setShowModal(false);
         await refreshData();
         window.location.reload();
@@ -98,6 +93,7 @@ interface PickupDropModalsProps {
     setFormData: Function;
     setShowModal: Function;
     setActionResult: Function;
+    setShowAlert: Function;
     refreshData: Function;
 }
 
