@@ -30,14 +30,14 @@ const ProductEditModal = ({ formData, setFormData, setShowModal, setActionResult
                 }
                 console.log(variables);
                 console.log(configCreator());
-                
+
                 const shop = await axios.put(
                     process.env.REACT_APP_API_HOST_URL + '/shops/' + formData.id,
                     variables,
                     configCreator()
                 );
                 console.log(shop);
-                
+
 
                 if (shop.data.data) {
                     // set Action Result

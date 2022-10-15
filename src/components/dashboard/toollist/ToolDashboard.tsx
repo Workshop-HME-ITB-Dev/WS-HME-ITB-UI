@@ -9,20 +9,18 @@ import ToolDeleteModal from "./modals/ToolDeleteModal";
 import AlertCard from "../basiccomponent/AlertCard";
 import ToolAddModal from "./modals/ToolAddModal";
 import ToolEditModal from "./modals/ToolEditModal";
-import { useLazyQuery } from "@apollo/client";
-import { GetToolsResponse } from "../../../graphql/toolQuery.types";
-import { GET_TOOLS } from "../../../graphql/toolsQuery";
 import { checkToken } from "../../../utils/jwtvalidator";
+import axios from "axios";
 
 
 const ToolDashboard = (): JSX.Element => {
-  const [getTools, { loading, error }] = useLazyQuery<GetToolsResponse>(GET_TOOLS, { fetchPolicy: 'cache-and-network' });
+  const [loading, setLoading] = useState<boolean>(true);
   const [showAlert, setShowAlert] = useState<boolean>(true);
+  const [alert, setAlert] = useState<null | AlertData>(null);
 
   const [tools, setTools] = useState<Tool[]>([]);
   const [filteredTools, setfilteredTools] = useState<Tool[]>([]);
   const [wordSearch, setWordSearch] = useState<string>('');
-  const [alert, setAlert] = useState<null | AlertData>(null);
   const [formData, setFormData] = useState<Tool>(formReset)
 
   const [addModal, setAddModal] = useState<boolean>(false);
@@ -48,16 +46,24 @@ const ToolDashboard = (): JSX.Element => {
   }
 
   const refreshData = async (): Promise<any> => {
+    setLoading(true);
     try {
-      const fetchToolsData = await getTools();
-      if (fetchToolsData.data) {
-        const filteredToolsData = fetchToolsData.data.tools.filter(x => x.activated)
+      const fetchTools = await axios.get(process.env.REACT_APP_API_HOST_URL + '/tools');
+
+      if (fetchTools.data.data) {
+        const filteredToolsData = fetchTools.data.data.filter(x => x.activated)
         setfilteredTools(filteredToolsData);
         setTools(filteredToolsData)
+        setLoading(false);
       }
     } catch (e: any) {
       console.error(e.message);
-      setAlert(e.message);
+      setAlert({
+        title: 'ERROR',
+        desc: e.message,
+        type: 'error'
+      })
+      setShowAlert(true);
       checkToken();
     }
     setWordSearch('');
@@ -67,16 +73,11 @@ const ToolDashboard = (): JSX.Element => {
   }, [])
   return (
     <>
-      {alert && <AlertCard data={alert} onClose={setAlert} />}
-      {showAlert && error && <AlertCard data={{
-        title: 'ERROR',
-        desc: error.message,
-        type: 'error'
-      }} onClose={setShowAlert} />}
+      {showAlert && alert && <AlertCard data={alert} onClose={setShowAlert} />}
       <div className="h-full flex flex-col mx-auto">
-        {addModal && <ToolAddModal formData={formData} setFormData={setFormData} setShowModal={setAddModal} setActionResult={setAlert} refreshData={refreshData} />}
-        {editModal && <ToolEditModal formData={formData} setFormData={setFormData} setShowModal={setEditModal} setActionResult={setAlert} refreshData={refreshData} />}
-        {deleteModal && <ToolDeleteModal formData={formData} setFormData={setFormData} setShowModal={setDeleteModal} setActionResult={setAlert} refreshData={refreshData} />}
+        {addModal && <ToolAddModal formData={formData} setFormData={setFormData} setShowModal={setAddModal} setActionResult={setAlert} setShowAlert={setShowAlert} refreshData={refreshData} />}
+        {editModal && <ToolEditModal formData={formData} setFormData={setFormData} setShowModal={setEditModal} setActionResult={setAlert} setShowAlert={setShowAlert} refreshData={refreshData} />}
+        {deleteModal && <ToolDeleteModal formData={formData} setFormData={setFormData} setShowModal={setDeleteModal} setActionResult={setAlert} setShowAlert={setShowAlert} refreshData={refreshData} />}
         <SearchBar wordSearch={wordSearch} onChange={onWordSearchChange} placeholder={"Cari Tools"} />
         <div className="flex flex-row w-full justify-center items-center gap-x-6">
           <button className=" bg-sky-400 text-slate-700 hover:bg-sky-200 font-bold py-2 px-4 rounded-lg w-auto">

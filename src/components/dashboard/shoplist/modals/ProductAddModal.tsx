@@ -1,15 +1,12 @@
-import { useMutation } from "@apollo/client";
 import axios from "axios";
 import { useState } from "react";
-import { CREATE_SHOP } from "../../../../graphql/shopQuery";
-import { CreateShopInput, CreateShopResponse } from "../../../../graphql/shopQuery.types";
+import { CreateShopInput } from "../../../../graphql/shopQuery.types";
 import { configCreator } from "../../../../utils/configCreator";
 import { checkToken } from "../../../../utils/jwtvalidator";
 import { validateShopForm } from "../../../../utils/shopFormValidator";
 import { Product, ProductError } from "../../../shop/shop.types";
 
 const ProductAddModal = ({ formData, setFormData, setShowModal, setActionResult, setShowAlert, refreshData }: ProductAddModalProps): JSX.Element => {
-    const [addProduct] = useMutation<CreateShopResponse>(CREATE_SHOP);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<ProductError>({
         title: "",

@@ -1,26 +1,22 @@
-import { Tool } from '../components/rent/rent.types';
+import { Tool } from "../components/rent/rent.types";
 
 export interface CreateToolInput {
-  createToolInput: {
-    name: string;
-    image: string;
-    activated: boolean;
-    totalStock: number;
-    priceHour: number;
-    priceDay: number;
-  };
+  name: string;
+  image: string;
+  activated: boolean;
+  totalStock: number;
+  priceHour: number;
+  priceDay: number;
 }
 
 export interface UpdateToolInput {
-  updateToolInput: {
-    id: number;
-    name: string;
-    image: string;
-    activated: boolean;
-    totalStock: number;
-    priceHour: number;
-    priceDay: number;
-  };
+  id: number;
+  name: string;
+  image: string;
+  activated: boolean;
+  totalStock: number;
+  priceHour: number;
+  priceDay: number;
 }
 
 export interface GetToolsResponse {

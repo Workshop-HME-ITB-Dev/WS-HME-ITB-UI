@@ -1,14 +1,12 @@
-import { useMutation } from "@apollo/client";
 import { useState } from "react";
-import { CreateToolInput, CreateToolResponse } from "../../../../graphql/toolQuery.types";
-import { CREATE_TOOL } from "../../../../graphql/toolsQuery";
+import { CreateToolInput } from "../../../../graphql/toolQuery.types";
 import { checkToken } from "../../../../utils/jwtvalidator";
 import { validateToolForm } from "../../../../utils/toolFormValidator";
 import { Tool, ToolError } from "../../../rent/rent.types";
 import axios from 'axios';
+import { configCreator } from "../../../../utils/configCreator";
 
-const ToolAddModal = ({ formData, setFormData, setShowModal, setActionResult, refreshData }: ToolAddModalProps): JSX.Element => {
-    const [addTool] = useMutation<CreateToolResponse>(CREATE_TOOL);
+const ToolAddModal = ({ formData, setFormData, setShowModal, setActionResult, setShowAlert, refreshData }: ToolAddModalProps): JSX.Element => {
     const [loading, setLoading] = useState<boolean>(false);
     const [image, setImage] = useState<File | null>(null);
     const [error, setError] = useState<ToolError>({
@@ -22,59 +20,83 @@ const ToolAddModal = ({ formData, setFormData, setShowModal, setActionResult, re
         e.preventDefault()
         const { error: err, result: res } = validateToolForm(formData);
         setError(res);
-        if (!err) {
-            setLoading(true);
-            try {
-                const bodyFormData: any = new FormData();
+        if (err) {
+            return;
+        }
+        setLoading(true);
+        try {
+            const bodyFormData: any = new FormData();
+            let uploadUrl;
+            let fileUrl;
+            if (process.env.IS_UPLOAD_CLOUDINARY === 'true') {
 
                 // Using Cloudinary so that the server is stateless
                 bodyFormData.append("file", image);
                 bodyFormData.append("upload_preset", process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET);
                 bodyFormData.append("cloud_name", process.env.REACT_APP_CLOUDINARY_CLOUD_NAME);
+                uploadUrl = `https://api.cloudinary.com/v1_1/${process.env.REACT_APP_CLOUDINARY_CLOUD_NAME}/image/upload`;
                 const resp = await axios.post(
-                    `https://api.cloudinary.com/v1_1/${process.env.REACT_APP_CLOUDINARY_CLOUD_NAME}/image/upload`,
+                    uploadUrl,
                     bodyFormData
                 );
-
-
-                // gql mutation
-                const variables: CreateToolInput = {
-                    createToolInput: {
-                        name: formData.name,
-                        image: resp.data.url as string,
-                        activated: true,
-                        totalStock: Number(formData.totalStock),
-                        priceHour: Number(formData.priceHour),
-                        priceDay: Number(formData.priceDay),
-                    }
-                }
-                const tool = await addTool({ variables })
-
-                if (tool.data) {
-                    setActionResult({
-                        title: "Success!",
-                        desc: "Tool added successfully.",
-                        type: "success",
-                    });
-                }
+                fileUrl = String(resp.data.url);
             }
-            catch (e: any) {
-                console.error(e.message);
+            else {
+                // Using Static upload form express
+                bodyFormData.append("image", image);
+                uploadUrl = process.env.REACT_APP_API_HOST_URL + '/uploads';
+                const resp = await axios.post(
+                    uploadUrl,
+                    bodyFormData,
+                    configCreator()
+                );
+                fileUrl = String(process.env.REACT_APP_API_HOST_URL + '/uploads/' + resp.data.data);
+            }
+
+            const variables: CreateToolInput = {
+                name: formData.name,
+                image: fileUrl,
+                activated: true,
+                totalStock: Number(formData.totalStock),
+                priceHour: Number(formData.priceHour),
+                priceDay: Number(formData.priceDay),
+            }
+            console.log("Finished uploading...", variables);
+
+            const tool = await axios.post(
+                process.env.REACT_APP_API_HOST_URL + '/tools',
+                variables,
+                configCreator()
+            );
+            console.log("SUCCESS");
+            console.log(tool);
+
+            if (tool.data.data) {
                 setActionResult({
-                    title: "Failed!",
-                    desc: e.message,
-                    type: "failed",
+                    title: "Success!",
+                    desc: "Tool added successfully.",
+                    type: "success",
                 });
-                checkToken();
             }
-            await new Promise(r => setTimeout(r, 500));
-            setLoading(false);
-            // Refresh data 
-            // leave the modal
-            setShowModal(false);
-            await refreshData();
-            // window.location.reload();
         }
+        catch (e: any) {
+            console.error(e.message);
+            setActionResult({
+                title: "Failed!",
+                desc: e.message,
+                type: "failed",
+            });
+            checkToken();
+        }
+        await new Promise(r => setTimeout(r, 500));
+        setLoading(false);
+        // Refresh data 
+        // leave the modal
+        setShowAlert(true);
+        setShowModal(false);
+        await refreshData();
+        // window.location.reload();
+
     }
     const onChange = (e: any): void => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -235,6 +257,7 @@ interface ToolAddModalProps {
     setFormData: Function;
     setShowModal: Function;
     setActionResult: Function;
+    setShowAlert: Function;
     refreshData: Function;
 }
 
