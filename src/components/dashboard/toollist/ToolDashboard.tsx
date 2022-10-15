@@ -114,9 +114,11 @@ const ToolDashboard = (): JSX.Element => {
 export default ToolDashboard;
 
 const headers = [
+  { label: "Id", key: "id" },
+  { label: "Nama", key: "name" },
   { label: "Gambar", key: "imageUrl" },
-  { label: "Judul", key: "title" },
   { label: "Stok Total", key: "totalStock" },
+  { label: "Aktivasi", key: "activated" },
   { label: "Harga Per Jam", key: "priceHour" },
   { label: "Harga Per Hari", key: "priceDay" }
 ];

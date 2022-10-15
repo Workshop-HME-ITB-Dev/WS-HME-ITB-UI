@@ -104,7 +104,7 @@ const Rent = (): JSX.Element => {
     setStep((step) => (step > 0 ? step - 1 : step));
   };
   const pingServer = async () => {
-    await axios.get("http://wshme.herokuapp.com/api");
+    await axios.get(process.env.REACT_APP_API_HOST_URL + '');
   }
   useEffect(() => {
     // Ping to avoid cold start - temp solution 
