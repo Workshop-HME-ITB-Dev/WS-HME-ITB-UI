@@ -25,6 +25,7 @@ const ModalPanduan = ({ showModal, setShowModal }: ModalPanduanProps): JSX.Eleme
                                 <li className="text-md">Membuka website <a className="hover:text-blue-500" href="https://workshophme.com/rent">https://workshophme.com/rent</a> </li>
                                 <li className="text-md">Mengisi Form Peminjaman Alat dengan mengisi data diri, waktu peminjaman, waktu pengembalian, dan memilih barang yang ingin dipinjam beserta jumlahnya</li>
                                 <li className="text-md">Setelah memverifikasi seluruh masukan pada form, tekan tombol Submit</li>
+                                <li className="text-md">Menghubungi kru WS <b>(LINE: abuhanif331 atau WA: 082121702498)</b> minimal 12 jam sebelum waktu peminjaman</li>
                                 <li className="text-md">Datang ke Sekre WS {`(${"Basement Labtek 8"})`} sesuai dengan tanggal dan waktu peminjaman </li>
                                 <li className="text-md">Serahkan KTM atau tanda pengenal lain kepada Kru WS</li>
                                 <li className="text-md">Terima barang yang dipinjam</li>
@@ -35,7 +36,7 @@ const ModalPanduan = ({ showModal, setShowModal }: ModalPanduanProps): JSX.Eleme
                             <ol className="my-2 text-justify list-decimal px-6">
                                 <li className="text-md">Datang ke Sekre WS {`(${"Basement Labtek 8"})`} sesuai dengan tanggal dan waktu pengembalian  </li>
                                 <li className="text-md">Serahkan barang pinjaman kepada Kru WS</li>
-                                <li className="text-md">Lakukan pembayaran secara Cash</li>
+                                <li className="text-md">Lakukan pembayaran secara Cash atau melalui rekening BCA <b>(0590515451 AN OWEN LIMVIN)</b></li>
                                 <li className="text-md">Minta kembali KTM atau kartu tanda pengenal yang diserahkan saat meminjam barang </li>
                             </ol>
                             <h2 className="font-sans text-xl text-semibold text-gray-900 mt-4">
@@ -44,14 +45,14 @@ const ModalPanduan = ({ showModal, setShowModal }: ModalPanduanProps): JSX.Eleme
                             <ol className="my-2 text-justify list-disc px-6">
                                 <li className="text-md">Diharapkan untuk datang untuk mengambil barang pinjaman serta mengembalikan barang pinjaman dengan tepat waktu</li>
                                 <li className="text-md">Toleransi keterlambatan peminjaman adalah 1 jam dari waktu yang telah ditentukan, lewat dari 1 jam maka akan dikenakan biaya denda sebesar tarif harga peminjaman normal</li>
-                                <li className="text-md">Jika tidak ditemui Kru WS pada Sekre WS, hubungi nomor yang tertera pada website</li>
-                                <li className="text-md">Jika harga peminjaman dengan tarif per jam lebih mahal dari tarif per hari, maka akan langsung dikenakan tarif per hari {'Misalkan pinjam 1 hari 11 jam, jika tarif pinjam 11 jam lebih mahal dibandingkan tarif per harinya, maka total pembayaran langsung menjadi 2 hari (lebih murah)'}</li>
+                                <li className="text-md">Jika tidak ditemui Kru WS pada Sekre WS, hubungi kru WS <b>(LINE: abuhanif331 atau WA: 082121702498)</b></li>
+                                <li className="text-md">Jika harga peminjaman dengan tarif per jam lebih mahal dari tarif per hari, maka akan langsung dikenakan tarif per hari. {'Misalkan pinjam 1 hari 11 jam, jika tarif pinjam 11 jam lebih mahal dibandingkan tarif per harinya, maka total pembayaran langsung menjadi 2 hari (lebih murah)'}</li>
                             </ol>
                         </div>
                     </div>
                 </div>
             </div>
-            <div className="opacity-25 fixed inset-0 z-40 bg-black"></div>
+                <div className="opacity-25 fixed inset-0 z-40 bg-black"></div>
             </>}
         </>
     );
